@@ -9,6 +9,7 @@ import { tablet, mobile, mobileSmall } from 'utils'
 import NFTDetail from './Modals/NFTDetail';
 import ConfirmWindow from 'components/Modals/ConfirmWindow'
 import { Actions } from 'store/types';
+import defaultNftImg from '../assets/empty_image.jpg'
 
 export const DefaultCard: React.FC<any> = (props: any) => {
   const { action, data, dataIndex, onClick } = props;
@@ -39,15 +40,16 @@ export const DefaultCard: React.FC<any> = (props: any) => {
     }
     setConfirm(false);
   }
-
+  console.log("data on modal---->",data)
   return (
     <Container>
       <CardBody>
         <Img
-          src={data.imagePath}
+          style={{height:'100%',backgroundColor:"green"}}
+          src={data.metadata===null?defaultNftImg:  data.imagePath}
           onClick={() => {
             if (action !== "collections") setShowModal(true);
-            else onClick();
+            // else onClick();
           }}
         />
         <Content>
@@ -72,13 +74,13 @@ export const DefaultCard: React.FC<any> = (props: any) => {
               {data.state}
             </Line>
           </Detail>}
-          {action === "collections" && <Opensea
+          {/* {action === "collections" && <Opensea
             href={"https://opensea.io/collection/" + data.author.toLowerCase()}
             target="_blank"
           >
             <Icon15x15 src="icons/opensea.svg" />
             <Line>View on OpenSea</Line>
-          </Opensea>}
+          </Opensea>} */}
         </Content>
       </CardBody>
       <Modal
@@ -132,6 +134,7 @@ const Img = styled.img`
   aspect-ratio: 1;
   border-radius: var(--border-radius) var(--border-radius) 0 0;
   cursor: pointer;
+  object-fit:cover;
 `
 const Content = styled.div`
   display: flex;

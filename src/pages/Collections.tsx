@@ -1,13 +1,16 @@
 import styled from 'styled-components';
-import { useMemo, useState } from 'react';
+import { useMemo, useState ,useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-
+import { useMoralis, useMoralisWeb3Api  } from 'react-moralis';
 import { Filter, DefaultCard } from 'components';
 
 const Collections: React.FC<any> = () => {
   const data = useSelector((state: any) => state.marketNFTs);
+  const { authenticate, isAuthenticated, isInitialized, account, chainId, logout } = useMoralis();
+  const [nfts, setNFts] = useState([])
   const navigate = useNavigate();
+  const Web3Api = useMoralisWeb3Api();  
   const collectionData = useMemo(() => {
     let newsArr = [];
     newsArr.push(data[0])
@@ -21,6 +24,21 @@ const Collections: React.FC<any> = () => {
   }, [data])
   const [searchData, setSearchData] = useState(data);
   const [filterData, setFilterData] = useState(collectionData);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      console.log("account---->",account)
+      const userEthNFTs = await Web3Api.account.getNFTs({chain:"rinkeby",address:account}) 
+      // const userEthNFTs = []
+      console.log("userEthNFTs---------",userEthNFTs)
+      setNFts([...userEthNFTs.result])
+      return userEthNFTs;
+    }
+    if(account){
+      const result = fetchData()
+    }
+  }, [account])
+
   return (
     <Container>
       <Filter
@@ -31,12 +49,19 @@ const Collections: React.FC<any> = () => {
         isMarket={false}
       />
       <Content>
-        {filterData.map((_data, index) => (
+        {/* {filterData.map((_data, index) => (
           <DefaultCard
             key={index}
             data={_data}
             action="collections"
             onClick={() => navigate("/Collections/" + _data.author)}
+          />
+        ))} */}
+        {nfts.map((_data: any, index: number) => (
+          <DefaultCard
+            key={index}
+            action={"collections"}
+            data={_data}
           />
         ))}
       </Content>

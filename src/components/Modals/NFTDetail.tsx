@@ -1,14 +1,29 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-
+import { useMoralis, useMoralisWeb3Api  } from 'react-moralis';
 import { Icon30x30 } from '../Icon';
 import { Button, Input } from "components";
 import { mobile } from 'utils'
 import { Actions } from "store/types";
+import { ABI, CONTRACT_ADDRESS, ERC721ABI, initWeb3, Networks, SYSTEM_ADDR, SYSTEM_PK, TOKENS_BY_NETWORK, WETH_CONTRACT } from "config/init"
 
 const NFTDetail: React.FC<any> = (props) => {
   const { setShowModal, data, setConfirm, action } = props;
   const navigate = useNavigate();
+  console.log("action in nft detail---->",action)
+  
+  const lendNft =async ()=>{
+    const web3 = initWeb3()
+    const contract = new web3.eth.Contract(ABI, CONTRACT_ADDRESS)
+    try {
+      const random = await contract.methods.getRandomIndex(100).call()
+      console.log("random----->",random)
+      return random
+    } catch (error) {
+      return error
+    }
+  }
+
 
   return (
     <Container>
@@ -111,7 +126,8 @@ const NFTDetail: React.FC<any> = (props) => {
           <Button
             text="OK"
             disabled={data.state === "Rented"}
-            onClick={() => {
+            onClick={async () => {
+              await lendNft()
               setShowModal(false);
               setConfirm(true);
             }}

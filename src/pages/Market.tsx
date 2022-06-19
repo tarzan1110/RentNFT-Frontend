@@ -3,14 +3,35 @@ import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 import { Filter, DefaultCard } from 'components';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Actions } from 'store/types';
+import { useMoralis, useMoralisWeb3Api  } from 'react-moralis';
+
 
 const Market: React.FC<any> = () => {
   const data = useSelector((state: any) => state.marketNFTs);
   const id = useParams().id || "";
   const [searchData, setSearchData] = useState(data);
   const [filterData, setFilterData] = useState(searchData);
+  const [nfts, setNFts] = useState([])
+  const { authenticate, isAuthenticated, isInitialized, account, chainId, logout } = useMoralis();
+  console.log('account---->',account)
+  const Web3Api = useMoralisWeb3Api();  
+
+  useEffect(() => {
+    const fetchData = async () => {
+      console.log("account---->",account)
+      const userEthNFTs = await Web3Api.account.getNFTs({chain:"rinkeby",address:account}) 
+      // const userEthNFTs = []
+      console.log("userEthNFTs---------",userEthNFTs)
+      setNFts([...userEthNFTs.result])
+      return userEthNFTs;
+    }
+    if(account){
+      const result = fetchData()
+    }
+  }, [account])
+
 
   const renderData = useMemo(() => {
     if (id === "") return filterData;
@@ -33,7 +54,7 @@ const Market: React.FC<any> = () => {
         isMarket={true}
       />
       <Content>
-        {renderData.map((_data: any, index: number) => (
+        {nfts.map((_data: any, index: number) => (
           <DefaultCard
             key={index}
             action={Actions.BUY_NFT}
