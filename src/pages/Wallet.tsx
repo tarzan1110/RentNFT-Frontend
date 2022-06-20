@@ -1,6 +1,7 @@
 import styled from 'styled-components';
+import { useMemo, useState ,useEffect } from 'react';
+import { useMoralis, useMoralisWeb3Api  } from 'react-moralis';
 import { useParams } from 'react-router-dom';
-import { useMoralis } from 'react-moralis';
 import { useSelector } from 'react-redux';
 
 import { DefaultCard } from 'components';
@@ -10,8 +11,24 @@ const Wallet: React.FC<any> = () => {
   const id = useParams().id || "";
   const lendData = useSelector((state: any) => state.myNFTs);
   const payBackData = useSelector((state: any) => state.rentNFTs);
+  const [nfts, setNFts] = useState([])
   const data = id === "Lend" ? lendData : payBackData;
-  const { isAuthenticated } = useMoralis();
+  const { authenticate, isAuthenticated, isInitialized, account, chainId, logout } = useMoralis();
+  const Web3Api = useMoralisWeb3Api();  
+
+  useEffect(() => {
+    const fetchData = async () => {
+      console.log("account---->",account)
+      const userEthNFTs = await Web3Api.account.getNFTs({chain:"rinkeby",address:account}) 
+      // const userEthNFTs = []
+      console.log("userEthNFTs---------",userEthNFTs)
+      setNFts([...userEthNFTs.result])
+      return userEthNFTs;
+    }
+    if(account){
+      const result = fetchData()
+    }
+  }, [account])
 
   return (
     <Container>
@@ -22,7 +39,7 @@ const Wallet: React.FC<any> = () => {
               Please connect to your Wallet.
             </span>
           </Text>}
-        {isAuthenticated && data.map((_data: any, index: number) => (
+        {isAuthenticated && nfts.map((_data: any, index: number) => (
           <DefaultCard
             key={index}
             action={id === "Lend" ? Actions.LEND_NFT : Actions.PAYBACK_NFT}
@@ -30,6 +47,14 @@ const Wallet: React.FC<any> = () => {
             data={_data}
           />
         ))}
+        {/* {isAuthenticated && data.map((_data: any, index: number) => (
+          <DefaultCard
+            key={index}
+            action={id === "Lend" ? Actions.LEND_NFT : Actions.PAYBACK_NFT}
+            dataIndex={index}
+            data={_data}
+          />
+        ))} */}
       </Content>
     </Container>
   );

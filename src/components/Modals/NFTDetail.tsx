@@ -1,30 +1,89 @@
 import styled from "styled-components";
+import {useState} from 'react'
 import { useNavigate } from "react-router-dom";
 import { useMoralis, useMoralisWeb3Api  } from 'react-moralis';
 import { Icon30x30 } from '../Icon';
-import { Button, Input } from "components";
+import { Button, Input , Select} from "components";
+import { unpackPrice ,packPrice} from "@renft/sdk";
 import { mobile } from 'utils'
 import { Actions } from "store/types";
-import { ABI, CONTRACT_ADDRESS, ERC721ABI, initWeb3, Networks, SYSTEM_ADDR, SYSTEM_PK, TOKENS_BY_NETWORK, WETH_CONTRACT } from "config/init"
+import { ABI, NFT_ABI, CONTRACT_ADDRESS, ERC721ABI, initWeb3, Networks, SYSTEM_ADDR, SYSTEM_PK, TOKENS_BY_NETWORK, WETH_CONTRACT } from "config/init"
 
 const NFTDetail: React.FC<any> = (props) => {
   const { setShowModal, data, setConfirm, action } = props;
   const navigate = useNavigate();
-  console.log("action in nft detail---->",action)
-  
+  const { Moralis } = useMoralis();
+  console.log("data in nft detail---->",data)
+  const [lendMaxDays, setLendMaxDays] = useState(0)
+  const [lendDailyPrice, setLendDailyPrice] = useState(0)
+  const [collateral, setCollateral] = useState(0)
+  const [paymentToken, setPaymentToken] = useState(1)
   const lendNft =async ()=>{
-    const web3 = initWeb3()
-    const contract = new web3.eth.Contract(ABI, CONTRACT_ADDRESS)
+    // const web3 = initWeb3()
+    // const contract = new web3.eth.Contract(ABI, CONTRACT_ADDRESS)
+    await approveNFT()
+    console.log("lendMaxDays--->",lendMaxDays)
+    console.log("lendDailyPrice--->",lendDailyPrice)
+    console.log("collateral--->",collateral)
+    console.log("paymentToken--->",paymentToken)
+    if(lendDailyPrice>0 && lendMaxDays>0 && collateral>0){
+      console.log("contract success....")
+      try {
+        
+        const finalParams = {
+          _nfts: [data.token_address],
+          _tokenIds: [data.token_id],
+          _lendAmounts: [1],
+          _maxRentDurations: [Number(lendMaxDays)],
+          _dailyRentPrices: [packPrice(lendDailyPrice)],
+          _nftPrices: [packPrice(collateral)],
+          _paymentTokens: [Number(paymentToken)]
+         }
+        
+        let options = {
+          contractAddress: "0x103c497e799C099F915EF39CDf0A3E99E5b47216",
+          functionName: "lend",
+          abi: ABI,
+          params: finalParams
+         };
+         console.log("options.params----->",options.params)
+         const message = await Moralis.executeFunction(options);
+         console.log("message after smart--->>", message)
+      
+      } catch (error) {
+        console.log("error on fire--->,error",error)
+        return error
+      }
+    }
+    
+  }
+  const onChangePaymentToken = (e)=>{
+     console.log("e on change pt--->",e.target.value)
+     setPaymentToken(e.target.value)
+  }
+  const approveNFT = async () =>{
+    const approve_request = {
+      chain: "rinkeby",
+      contractAddress: "0x67d281c04ce95e11270496435942767c05fa68a1",
+      functionName: "setApprovalForAll",
+      abi: ERC721ABI,
+      // abi: mint721ABI.abi,
+      params: {
+        to:"0x103c497e799C099F915EF39CDf0A3E99E5b47216",
+        approved: true
+      },
+    }
+    console.log('approve_request', approve_request);
     try {
-      const random = await contract.methods.getRandomIndex(100).call()
-      console.log("random----->",random)
-      return random
-    } catch (error) {
-      return error
+      const result = await Moralis.executeFunction(approve_request)
+      // setIsFullLoading(false);
+    } catch(e) {
+      console.log('eeeeeeeeeeeee', e)
+      // setIsFullLoading(false);
+      return false;
     }
   }
-
-
+  
   return (
     <Container>
       <Title>
@@ -91,15 +150,22 @@ const NFTDetail: React.FC<any> = (props) => {
             <Input
               title="Max Duration"
               unit="Days"
+              value={lendMaxDays}
+              onChange={(e)=>{setLendMaxDays(e.target.value)}}
             />
             <Input
               title="Daily price"
-              unit="ETH"
+              // unit="ETH"
+              value={lendDailyPrice}
+              onChange={(e)=>{setLendDailyPrice(e.target.value)}}
             />
             <Input
               title="Collateral"
-              unit="ETH"
+              // unit="ETH"
+              value={collateral}
+              onChange={(e)=>{setCollateral(e.target.value)}}
             />
+            <Select title="Payment Token" onChange={onChangePaymentToken}/>
           </Block>}
           {action === Actions.PAYBACK_NFT && <Block>
             <Line>
@@ -129,7 +195,7 @@ const NFTDetail: React.FC<any> = (props) => {
             onClick={async () => {
               await lendNft()
               setShowModal(false);
-              setConfirm(true);
+              // setConfirm(true);
             }}
           />
         </Section>

@@ -13,7 +13,7 @@ import defaultNftImg from '../assets/empty_image.jpg'
 
 export const DefaultCard: React.FC<any> = (props: any) => {
   const { action, data, dataIndex, onClick } = props;
-
+  console.log('data in card--->',data)
   let [showModal, setShowModal] = useState(false);
   let [confirm, setConfirm] = useState(false);
   const { isAuthenticated } = useMoralis();
@@ -21,6 +21,25 @@ export const DefaultCard: React.FC<any> = (props: any) => {
   const text = action === Actions.BUY_NFT ?
     (isAuthenticated ? "Rented Sucessfully!" : "Please connect to your Wallet.") :
     (action === Actions.LEND_NFT ? "Lended Sucessfully!" : "Returned Sucessfully!")
+  console.log("action---->",action)
+  // const clickOk = () => {
+  //   switch (action) {
+  //     case Actions.BUY_NFT: {
+  //       if (isAuthenticated)
+  //         dispatch({ type: Actions.BUY_NFT, title: data.title });
+  //       break;
+  //     }
+  //     case Actions.LEND_NFT: {
+  //       dispatch({ type: Actions.LEND_NFT, dataIndex: dataIndex });
+  //       break;
+  //     }
+  //     case Actions.PAYBACK_NFT: {
+  //       dispatch({ type: Actions.PAYBACK_NFT, dataIndex: dataIndex });
+  //       break;
+  //     }
+  //   }
+  //   setConfirm(false);
+  // }
 
   const clickOk = () => {
     switch (action) {
@@ -30,7 +49,7 @@ export const DefaultCard: React.FC<any> = (props: any) => {
         break;
       }
       case Actions.LEND_NFT: {
-        dispatch({ type: Actions.LEND_NFT, dataIndex: dataIndex });
+        // dispatch({ type: Actions.LEND_NFT, dataIndex: dataIndex });
         break;
       }
       case Actions.PAYBACK_NFT: {
@@ -40,7 +59,7 @@ export const DefaultCard: React.FC<any> = (props: any) => {
     }
     setConfirm(false);
   }
-  console.log("data on modal---->",data)
+  
   return (
     <Container>
       <CardBody>

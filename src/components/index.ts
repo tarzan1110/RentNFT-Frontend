@@ -7,5 +7,5 @@ import { DefaultCard } from "./Card";
 import Selector from "./Selector";
 import Modal from "./Modals";
 import { Input } from "./Input";
-
-export { Button, Search, Logo, Filter, Icon, DefaultCard, Selector, Modal, Input };
+import {Select} from './Select'
+export { Button, Search, Logo, Filter, Icon, DefaultCard, Selector,Select, Modal, Input };
