@@ -1,23 +1,70 @@
 import styled from "styled-components";
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
 import { useNavigate } from "react-router-dom";
-import { useMoralis, useMoralisWeb3Api  } from 'react-moralis';
+import { useMoralis, useMoralisWeb3Api ,useNewMoralisObject  } from 'react-moralis';
 import { Icon30x30 } from '../Icon';
 import { Button, Input , Select} from "components";
 import { unpackPrice ,packPrice} from "@renft/sdk";
 import { mobile } from 'utils'
 import { Actions } from "store/types";
+import defaultNftImg from '../../assets/empty_image.jpg'
 import { ABI, NFT_ABI, CONTRACT_ADDRESS, ERC721ABI, initWeb3, Networks, SYSTEM_ADDR, SYSTEM_PK, TOKENS_BY_NETWORK, WETH_CONTRACT } from "config/init"
 
+type CAHIN_TYPE = "eth" | "0x1" | "ropsten" | "0x3" | "rinkeby" | "0x4" | "goerli" | "0x5" | "kovan" | "0x2a" | "polygon" | "0x89" | "mumbai" | "0x13881" | "bsc" | "0x38" | "bsc testnet" | "0x61" | "avalanche" | "0xa86a" | "avalanche testnet" | "0xa869" | "fantom" | "0xfa" | undefined
+
 const NFTDetail: React.FC<any> = (props) => {
-  const { setShowModal, data, setConfirm, action } = props;
+  const { setShowModal, data, setConfirm, action,account } = props;
+  console.log("account in nft detail---p>", account)
   const navigate = useNavigate();
   const { Moralis } = useMoralis();
-  console.log("data in nft detail---->",data)
+  const Web3Api = useMoralisWeb3Api();  
   const [lendMaxDays, setLendMaxDays] = useState(0)
   const [lendDailyPrice, setLendDailyPrice] = useState(0)
   const [collateral, setCollateral] = useState(0)
   const [paymentToken, setPaymentToken] = useState(1)
+  const [imageUri, setImageUri] = useState(null)
+  
+
+  useEffect(()=>{
+    const fetchTokenIdMetadata = async () => {
+      const options = {
+        address: data.token_address,
+        token_id: data.token_id,
+        chain: "rinkeby" as CAHIN_TYPE,
+      };
+      const tokenIdMetadata = await Web3Api.token.getTokenIdMetadata(options);
+      setImageUri(tokenIdMetadata.token_uri)
+      console.log("tokenIdMetadata----------",tokenIdMetadata);
+    };
+    fetchTokenIdMetadata()
+  },[data])
+  const saveToDb = async ()=>{
+    const LendRecord = Moralis.Object.extend("lend_records");
+    const lendRecord = new LendRecord();
+
+    lendRecord
+      .save({
+        lender:"",
+        token_id: data.token_id,
+        token_address: data.token_address,
+        daily_price: lendDailyPrice,
+        max_days: lendMaxDays,
+        collateral: collateral,
+        image_url: "",
+        paymentToken:paymentToken
+      })
+      .then(
+        (record) => {
+          console.log("saved record--------->",record)
+          // The object was saved successfully.
+        },
+        (error) => {
+          // The save failed.
+          // error is a Moralis.Error with an error code and message.
+        }
+      );
+  }
+
   const lendNft =async ()=>{
     // const web3 = initWeb3()
     // const contract = new web3.eth.Contract(ABI, CONTRACT_ADDRESS)
@@ -83,12 +130,16 @@ const NFTDetail: React.FC<any> = (props) => {
       return false;
     }
   }
-  
+  const getTitle = ()=>{
+    if (action==="LEND_NFT"){
+      return "LEND NFT"
+    }
+  }
   return (
     <Container>
       <Title>
         <Icon30x30 src="icons/logo.svg" />
-        <Span>Settings</Span>
+        <Span>{getTitle()}</Span>
         <Icon30x30
           src="icons/close.svg"
           onClick={() => setShowModal(false)}
@@ -96,7 +147,7 @@ const NFTDetail: React.FC<any> = (props) => {
       </Title>
       <Content>
         <Section>
-          <Img src={data.imagePath} />
+          <Img src={data.imagePath || defaultNftImg} />             
         </Section>
         <Section>
           <Block>
@@ -193,7 +244,8 @@ const NFTDetail: React.FC<any> = (props) => {
             text="OK"
             disabled={data.state === "Rented"}
             onClick={async () => {
-              await lendNft()
+              // await lendNft()
+              saveToDb()
               setShowModal(false);
               // setConfirm(true);
             }}
@@ -267,6 +319,7 @@ const Img = styled.img`
   max-width: 500px;
   aspect-ratio: 1;
   box-sizing: border-box;
+  object-fit: contain;
 `;
 
 const Lender = styled.div`

@@ -2,10 +2,10 @@ import styled from 'styled-components';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
-import { Filter, DefaultCard } from 'components';
+import { Filter, MarketCard } from 'components';
 import { useEffect, useMemo, useState } from 'react';
 import { Actions } from 'store/types';
-import { useMoralis, useMoralisWeb3Api  } from 'react-moralis';
+import { useMoralis, useMoralisWeb3Api,useMoralisQuery  } from 'react-moralis';
 
 
 const Market: React.FC<any> = () => {
@@ -13,23 +13,32 @@ const Market: React.FC<any> = () => {
   const id = useParams().id || "";
   const [searchData, setSearchData] = useState(data);
   const [filterData, setFilterData] = useState(searchData);
-  const [nfts, setNFts] = useState([])
-  const { authenticate, isAuthenticated, isInitialized, account, chainId, logout } = useMoralis();
-  console.log('account---->',account)
+  const [lends, setLends] = useState([])
   const Web3Api = useMoralisWeb3Api();  
+  const { authenticate, isAuthenticated, isInitialized, account, chainId, logout } = useMoralis();
+  
+  const { fetch } = useMoralisQuery(
+    "lend_records",
+    (query) =>
+      query.limit(10),
+    [],
+    { autoFetch: false }
+  );
+
+  
 
   useEffect(() => {
-    const fetchData = async () => {
-      console.log("account---->",account)
-      const userEthNFTs = await Web3Api.account.getNFTs({chain:"rinkeby",address:account}) 
-      // const userEthNFTs = []
-      console.log("userEthNFTs---------",userEthNFTs)
-      setNFts([...userEthNFTs.result])
-      return userEthNFTs;
-    }
-    if(account){
-      const result = fetchData()
-    }
+    const getLendRecords = async () => {
+      const results = await fetch();
+      if(results){
+        const data = results.map((result)=>result.attributes)
+        console.log("results------------->",data)
+        setLends([...data])
+      }
+      
+    };
+    getLendRecords()
+    
   }, [account])
 
 
@@ -46,16 +55,9 @@ const Market: React.FC<any> = () => {
 
   return (
     <Container>
-      <Filter
-        data={data}
-        searchData={searchData}
-        setSearchData={setSearchData}
-        setFilterData={setFilterData}
-        isMarket={true}
-      />
       <Content>
-        {nfts.map((_data: any, index: number) => (
-          <DefaultCard
+        {lends.map((_data: any, index: number) => (
+          <MarketCard
             key={index}
             action={Actions.BUY_NFT}
             data={_data}
