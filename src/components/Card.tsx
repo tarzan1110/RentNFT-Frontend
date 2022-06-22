@@ -59,13 +59,14 @@ export const DefaultCard: React.FC<any> = (props: any) => {
     }
     setConfirm(false);
   }
-  
+  console.log("data.metadata------>", data.metadata)
   return (
     <Container>
       <CardBody>
         <Img
           style={{height:'100%',backgroundColor:"green"}}
-          src={data.metadata===null?defaultNftImg:  data.imagePath}
+          src={data.metadata===null?defaultNftImg:  data.image}
+          // src = {data.image}
           onClick={() => {
             if (action !== "collections") setShowModal(true);
             // else onClick();

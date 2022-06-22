@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import {useEffect, useState} from 'react'
 import { useNavigate } from "react-router-dom";
-import { useMoralis, useMoralisWeb3Api ,useNewMoralisObject  } from 'react-moralis';
+import { useMoralis, useMoralisWeb3Api ,useNewMoralisObject ,useMoralisQuery } from 'react-moralis';
 import { Icon30x30 } from '../Icon';
 import { Button, Input , Select} from "components";
 import { unpackPrice ,packPrice} from "@renft/sdk";
@@ -9,21 +9,31 @@ import { mobile } from 'utils'
 import { Actions } from "store/types";
 import defaultNftImg from '../../assets/empty_image.jpg'
 import { ABI, NFT_ABI, CONTRACT_ADDRESS, ERC721ABI, initWeb3, Networks, SYSTEM_ADDR, SYSTEM_PK, TOKENS_BY_NETWORK, WETH_CONTRACT } from "config/init"
+import USDT_CONFIG from 'config/USDT.json'
 
 type CAHIN_TYPE = "eth" | "0x1" | "ropsten" | "0x3" | "rinkeby" | "0x4" | "goerli" | "0x5" | "kovan" | "0x2a" | "polygon" | "0x89" | "mumbai" | "0x13881" | "bsc" | "0x38" | "bsc testnet" | "0x61" | "avalanche" | "0xa86a" | "avalanche testnet" | "0xa869" | "fantom" | "0xfa" | undefined
 
 const NFTDetail: React.FC<any> = (props) => {
   const { setShowModal, data, setConfirm, action,account } = props;
-  console.log("account in nft detail---p>", account)
+  console.log("data of nft detail---------->", data)
   const navigate = useNavigate();
   const { Moralis } = useMoralis();
   const Web3Api = useMoralisWeb3Api();  
   const [lendMaxDays, setLendMaxDays] = useState(0)
+  const [rentDuration, setRentDuration] = useState(0)
   const [lendDailyPrice, setLendDailyPrice] = useState(0)
   const [collateral, setCollateral] = useState(0)
-  const [paymentToken, setPaymentToken] = useState(1)
+  const [paymentToken, setPaymentToken] = useState("4")
   const [imageUri, setImageUri] = useState(null)
   
+  const { fetch } = useMoralisQuery(
+    "lend_records_sync",
+    (query) =>
+      query.equalTo("tokenId",data.token_id),
+    [],
+    { autoFetch: false }
+  );
+
 
   useEffect(()=>{
     const fetchTokenIdMetadata = async () => {
@@ -34,11 +44,50 @@ const NFTDetail: React.FC<any> = (props) => {
       };
       const tokenIdMetadata = await Web3Api.token.getTokenIdMetadata(options);
       setImageUri(tokenIdMetadata.token_uri)
-      console.log("tokenIdMetadata----------",tokenIdMetadata);
     };
     fetchTokenIdMetadata()
   },[data])
+
+  const rentNFT=async ()=>{
+    try {      
+      const results = await fetch();
+      const lendingId = results[0].attributes.lendingId
+      if(lendingId){
+        const finalParams = {
+          _nfts: [data.token_address],
+          _tokenIds:  [data.token_id],
+          _lendingIds: [lendingId],
+          _rentDurations: [Number(rentDuration)]
+         }
+  
+        console.log("finalParams---on rent-->", finalParams)
+        let options = {
+          contractAddress: "0x103c497e799C099F915EF39CDf0A3E99E5b47216",
+          functionName: "rent",
+          abi: ABI,
+          params: finalParams
+         };
+        await approvePayment()
+        console.log("Payment is approved!")
+        const message = await Moralis.executeFunction(options);
+      }
+    } catch (error) {
+      console.log("error on rentNFT--->,error",error)
+      return error
+    }
+  }
+
+  const onConfirm =async ()=>{
+    if (action==="LEND_NFT"){
+     await lendNft()
+    
+    }
+    if (action==="BUY_NFT"){
+      await rentNFT()
+    }
+  }
   const saveToDb = async ()=>{
+    console.log("saveToDb is started.......")
     const LendRecord = Moralis.Object.extend("lend_records");
     const lendRecord = new LendRecord();
 
@@ -66,17 +115,19 @@ const NFTDetail: React.FC<any> = (props) => {
   }
 
   const lendNft =async ()=>{
-    // const web3 = initWeb3()
-    // const contract = new web3.eth.Contract(ABI, CONTRACT_ADDRESS)
     await approveNFT()
+
+    console.log("NFT is approved!!!")
     console.log("lendMaxDays--->",lendMaxDays)
     console.log("lendDailyPrice--->",lendDailyPrice)
     console.log("collateral--->",collateral)
     console.log("paymentToken--->",paymentToken)
+    console.log("packprice- lendDaily --->", packPrice(lendDailyPrice))
+    const resultPrice = packPrice(lendDailyPrice)
+    console.log("unpackprice- lendDaily --->", unpackPrice(resultPrice))
     if(lendDailyPrice>0 && lendMaxDays>0 && collateral>0){
       console.log("contract success....")
       try {
-        
         const finalParams = {
           _nfts: [data.token_address],
           _tokenIds: [data.token_id],
@@ -95,8 +146,7 @@ const NFTDetail: React.FC<any> = (props) => {
          };
          console.log("options.params----->",options.params)
          const message = await Moralis.executeFunction(options);
-         console.log("message after smart--->>", message)
-      
+         saveToDb()
       } catch (error) {
         console.log("error on fire--->,error",error)
         return error
@@ -105,13 +155,14 @@ const NFTDetail: React.FC<any> = (props) => {
     
   }
   const onChangePaymentToken = (e)=>{
-     console.log("e on change pt--->",e.target.value)
+     console.log("type of payment-- ",typeof e.target.value)
      setPaymentToken(e.target.value)
   }
   const approveNFT = async () =>{
+    console.log("approveNFT data.token_address------------>", typeof data.token_address)
     const approve_request = {
       chain: "rinkeby",
-      contractAddress: "0x67d281c04ce95e11270496435942767c05fa68a1",
+      contractAddress: data.token_address,
       functionName: "setApprovalForAll",
       abi: ERC721ABI,
       // abi: mint721ABI.abi,
@@ -130,10 +181,40 @@ const NFTDetail: React.FC<any> = (props) => {
       return false;
     }
   }
+
+  const approvePayment = async () =>{
+    
+    const approve_request = {
+      chain: "rinkeby",
+      contractAddress: USDT_CONFIG.address,
+      functionName: "approve",
+      abi: USDT_CONFIG.abi,
+      // abi: mint721ABI.abi,
+      params: {
+        spender:"0x103c497e799C099F915EF39CDf0A3E99E5b47216",
+        amount: 99999999999
+      },
+    }
+    console.log('approve_request', approve_request);
+    try {
+      const result = await Moralis.executeFunction(approve_request)
+      // setIsFullLoading(false);
+    } catch(e) {
+      console.log('eeeeeeeeeeeee', e)
+      // setIsFullLoading(false);
+      return false;
+    }
+  }
+
   const getTitle = ()=>{
+    console.log("action in get Title ---->",action)
     if (action==="LEND_NFT"){
       return "LEND NFT"
     }
+    if (action==="BUY_NFT"){
+      return "RENT NFT"
+    }
+    
   }
   return (
     <Container>
@@ -183,18 +264,20 @@ const NFTDetail: React.FC<any> = (props) => {
             <Input
               title="Rent Duration"
               unit="Days"
+              value={rentDuration}
+              onChange={(e)=>{setRentDuration(e.target.value)}}
             />
             <Line>
               <Text>Max Duration</Text>
-              <Text>{data.maxDuration} Days</Text>
+              <Text>{data.max_days} Days</Text>
             </Line>
             <Line>
               <Text>Daily price</Text>
-              <Text>{data.dailyPrice} {data.priceUnit}</Text>
+              <Text>{data.daily_price} {data.priceUnit}</Text>
             </Line>
             <Line>
               <Text>Collateral</Text>
-              <Text>{data.collateralPrice} {data.priceUnit}</Text>
+              <Text>{data.collateral} {data.priceUnit}</Text>
             </Line>
           </Block>}
           {action === Actions.LEND_NFT && <Block>
@@ -244,8 +327,7 @@ const NFTDetail: React.FC<any> = (props) => {
             text="OK"
             disabled={data.state === "Rented"}
             onClick={async () => {
-              // await lendNft()
-              saveToDb()
+              onConfirm()
               setShowModal(false);
               // setConfirm(true);
             }}

@@ -7,7 +7,7 @@ export const Select: React.FC<any> = (props) => {
         {props.title}
       </Title>
       <Content>
-        <InputStyle name="cars" onChange={props.onChange} id="cars">
+        <InputStyle name="cars" defaultValue={"4"} onChange={props.onChange} id="cars">
             <option value={1}>WETH</option>
             <option value={2}>DAI</option>
             <option value={3}>USDC</option>
