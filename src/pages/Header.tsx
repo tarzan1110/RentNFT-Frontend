@@ -121,10 +121,16 @@ const Header: React.FC = () => {
             Lend
           </Menu>
           <Menu
-            onClick={() => onClick("/Wallet/PayBack")}
-            isActive={tab === "/Wallet/PayBack"}
+            onClick={() => onClick("/Rents")}
+            isActive={tab === "/Rents"}
           >
             Pay Back
+          </Menu>
+          <Menu
+            onClick={() => onClick("/Claim")}
+            isActive={tab === "/Claim"}
+          >
+            Claim
           </Menu>
         </Section>
         <Menu

@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMoralis } from 'react-moralis';
 import { useDispatch } from 'react-redux';
 
@@ -7,21 +7,30 @@ import { Icon15x15 } from './Icon';
 import Modal from './Modals';
 import { tablet, mobile, mobileSmall } from 'utils'
 import NFTDetail from './Modals/NFTDetail';
+import {NotificationContainer, NotificationManager} from 'react-notifications';
 import ConfirmWindow from 'components/Modals/ConfirmWindow'
 import { Actions } from 'store/types';
 import defaultNftImg from '../assets/empty_image.jpg'
 
 export const DefaultCard: React.FC<any> = (props: any) => {
   const { action, data, dataIndex, onClick } = props;
-  console.log('data in card--->',data)
   let [showModal, setShowModal] = useState(false);
   let [confirm, setConfirm] = useState(false);
+  const [metaData, setMetaData] = useState(null)
   const { isAuthenticated } = useMoralis();
   const dispatch = useDispatch();
   const text = action === Actions.BUY_NFT ?
     (isAuthenticated ? "Rented Sucessfully!" : "Please connect to your Wallet.") :
     (action === Actions.LEND_NFT ? "Lended Sucessfully!" : "Returned Sucessfully!")
-  console.log("action---->",action)
+
+  useEffect(()=>{
+    if(data.metadata){
+      const metaObj = JSON.parse(data.metadata)
+      setMetaData(metaObj)
+      console.log("metaObj-0--->", metaObj)
+    }
+  },[data.metadata])
+  console.log('data on default card------->',data)
   // const clickOk = () => {
   //   switch (action) {
   //     case Actions.BUY_NFT: {
@@ -59,11 +68,49 @@ export const DefaultCard: React.FC<any> = (props: any) => {
     }
     setConfirm(false);
   }
-  console.log("data.metadata------>", data.metadata)
+  console.log('metaData?.image------->',metaData?.image)
+ 
   return (
     <Container>
       <CardBody>
-        <Img
+        { action === Actions.PAYBACK_NFT && 
+          <Img
+            style={{height:'100%',backgroundColor:"green"}}
+            src={data.image_url===""?defaultNftImg:  data.image_url}
+            // src = {data.image}
+            onClick={() => {
+              if (action !== "collections") setShowModal(true);
+              // else onClick();
+            }}
+          />
+        }
+         { action === Actions.LEND_NFT && 
+          <Img
+            style={{height:'100%',backgroundColor:"green"}}
+            // src={metaData?.image}
+            src = {defaultNftImg}
+            onClick={() => {
+              if (action !== "collections") setShowModal(true);
+              // else onClick();
+            }}
+          />
+        }
+         { action === Actions.CLAIM_NFT && 
+          <Img
+            style={{height:'100%',backgroundColor:"green"}}
+            src={data.image_url===""?defaultNftImg:  data.image_url}
+            // src = {data.image}
+            onClick={() => {
+              if (action !== "collections") {
+                setShowModal(true)
+              } else{
+                onClick();
+              };
+            }}
+          />
+        }
+        {action === Actions.BUY_NFT && 
+          <Img
           style={{height:'100%',backgroundColor:"green"}}
           src={data.metadata===null?defaultNftImg:  data.image}
           // src = {data.image}
@@ -72,28 +119,117 @@ export const DefaultCard: React.FC<any> = (props: any) => {
             // else onClick();
           }}
         />
+        }
+        {action === "collections" && 
+          <Img
+            style={{height:'100%',backgroundColor:"green"}}
+            src={data.image_url===""?defaultNftImg:  data.image_url}
+            // src = {data.image}
+            onClick={() => {
+              onClick();
+            }}
+        />
+        }
         <Content>
           <Title>{action === "collections" ? data.author : data.title}</Title>
-          {action === Actions.BUY_NFT && <Detail>
-            <Line>{data.author}</Line>
-            <Line>
-              Daily Price
-              <div>
-                {data.dailyPrice}
-                {data.priceUnit}
+          {
+            action === Actions.BUY_NFT && 
+              <Detail>
+                <Line>{data.author}</Line>
+                <Line>
+                  Daily Price
+                  <div>
+                    {data.dailyPrice}
+                    {data.priceUnit}
+                  </div>
+                </Line>
+                <Line>
+                  Collateral
+                  <div>
+                    {data.collateralPrice}
+                    {data.priceUnit}
+                  </div>
+                </Line>
+                <Line>
+                  {data.state}
+                </Line>
+              </Detail>
+          }
+          {
+            action === Actions.PAYBACK_NFT && 
+              <Detail>
+                <Line>{data.author}</Line>
+                <Line>
+                  Daily Price
+                  <div>
+                    {data.daily_price}
+                    {data.priceUnit}
+                  </div>
+                </Line>
+                <Line>
+                  Collateral
+                  <div>
+                    {data.collateral}
+                    {data.priceUnit}
+                  </div>
+                </Line>
+                <Line>
+                  {data.state}
+                </Line>
+              </Detail>
+          }
+          {
+            action === Actions.CLAIM_NFT && 
+              <Detail>
+                <Line>{data.author}</Line>
+                <Line>
+                  Daily Price
+                  <div>
+                    {data.daily_price}
+                    {data.priceUnit}
+                  </div>
+                </Line>
+                <Line>
+                  Collateral
+                  <div>
+                    {data.collateral}
+                    {data.priceUnit}
+                  </div>
+                </Line>
+                <Line>
+                  {data.state}
+                </Line>
+              </Detail>
+          }
+            {
+            action === Actions.LEND_NFT && 
+              <div style={{textAlign:'center'}}>
+                {metaData?.name}
               </div>
-            </Line>
-            <Line>
-              Collateral
-              <div>
-                {data.collateralPrice}
-                {data.priceUnit}
-              </div>
-            </Line>
-            <Line>
-              {data.state}
-            </Line>
-          </Detail>}
+          }
+          {
+            action === "collections" && 
+              <Detail>
+                <Line>{data.author}</Line>
+                <Line>
+                  Daily Price
+                  <div>
+                    {data.daily_price}
+                    {data.priceUnit}
+                  </div>
+                </Line>
+                <Line>
+                  Collateral
+                  <div>
+                    {data.collateral}
+                    {data.priceUnit}
+                  </div>
+                </Line>
+                <Line>
+                  {data.state}
+                </Line>
+              </Detail>
+          }
           {/* {action === "collections" && <Opensea
             href={"https://opensea.io/collection/" + data.author.toLowerCase()}
             target="_blank"
@@ -123,6 +259,7 @@ export const DefaultCard: React.FC<any> = (props: any) => {
           />
         }
       />
+      <NotificationContainer/>
     </Container >
   );
 }

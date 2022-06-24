@@ -10,7 +10,9 @@ import { useMoralis, useMoralisWeb3Api,useMoralisQuery  } from 'react-moralis';
 
 const Market: React.FC<any> = () => {
   const data = useSelector((state: any) => state.marketNFTs);
-  const id = useParams().id || "";
+  const tokenAddressParam = useParams().id || "";
+  
+  console.log("tokenAddressParam--xxxxxxxxxx-->", tokenAddressParam)
   const [searchData, setSearchData] = useState(data);
   const [filterData, setFilterData] = useState(searchData);
   const [lends, setLends] = useState([])
@@ -20,7 +22,7 @@ const Market: React.FC<any> = () => {
   const { fetch } = useMoralisQuery(
     "lend_records",
     (query) =>
-      query.limit(10),
+      query.equalTo("status","lend").limit(10).equalTo("token_address",tokenAddressParam),
     [],
     { autoFetch: false }
   );
@@ -32,7 +34,6 @@ const Market: React.FC<any> = () => {
       const results = await fetch();
       if(results){
         const data = results.map((result)=>result.attributes)
-        console.log("results------------->",data)
         setLends([...data])
       }
       
@@ -43,15 +44,15 @@ const Market: React.FC<any> = () => {
 
 
   const renderData = useMemo(() => {
-    if (id === "") return filterData;
+    if (tokenAddressParam === "") return filterData;
     else {
       let tempArr = [];
       for (let i = 0; i < data.length; i++) {
-        if (data[i].author === id) tempArr.push(data[i]);
+        if (data[i].author === tokenAddressParam) tempArr.push(data[i]);
       }
       return tempArr;
     }
-  }, [id, data, filterData])
+  }, [tokenAddressParam, data, filterData])
 
   return (
     <Container>

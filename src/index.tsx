@@ -17,6 +17,7 @@ const appElement = (
       <MoralisProvider
         serverUrl={MORALIS_TEST_SERVER.serverUrl}
         appId={MORALIS_TEST_SERVER.appId}
+        // masterKey = {MORALIS_TEST_SERVER.masterKey}
       >
         <HashRouter>
           <App />

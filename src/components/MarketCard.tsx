@@ -13,7 +13,6 @@ import defaultNftImg from '../assets/empty_image.jpg'
 
 export const MarketCard: React.FC<any> = (props: any) => {
   const { action, data, dataIndex, onClick } = props;
-  console.log('data  in  market card--->',data)
   const {image_url,daily_price,collateral} = data
   let [showModal, setShowModal] = useState(false);
   let [confirm, setConfirm] = useState(false);
@@ -22,26 +21,7 @@ export const MarketCard: React.FC<any> = (props: any) => {
   const text = action === Actions.BUY_NFT ?
     (isAuthenticated ? "Rented Sucessfully!" : "Please connect to your Wallet.") :
     (action === Actions.LEND_NFT ? "Lended Sucessfully!" : "Returned Sucessfully!")
-  console.log("action---->",action)
-  // const clickOk = () => {
-  //   switch (action) {
-  //     case Actions.BUY_NFT: {
-  //       if (isAuthenticated)
-  //         dispatch({ type: Actions.BUY_NFT, title: data.title });
-  //       break;
-  //     }
-  //     case Actions.LEND_NFT: {
-  //       dispatch({ type: Actions.LEND_NFT, dataIndex: dataIndex });
-  //       break;
-  //     }
-  //     case Actions.PAYBACK_NFT: {
-  //       dispatch({ type: Actions.PAYBACK_NFT, dataIndex: dataIndex });
-  //       break;
-  //     }
-  //   }
-  //   setConfirm(false);
-  // }
-
+  
   const clickOk = () => {
     switch (action) {
       case Actions.BUY_NFT: {
