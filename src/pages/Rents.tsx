@@ -24,12 +24,24 @@ const Rents: React.FC<any> = () => {
     [],
     { autoFetch: false }
   );
+
+  const refresh = async ()=>{
+    setTimeout(async ()=>{
+      const results = await fetch();
+      if(results){
+        const data = results.map((result)=>result.attributes)
+        setRents([...data])
+      }
+    },3000)
+    
+  }
+
   useEffect(() => {
+
     const getRents = async () => {
       const results = await fetch();
       if(results){
         const data = results.map((result)=>result.attributes)
-        console.log("results------------->",data)
         setRents([...data])
       }
       
@@ -53,6 +65,7 @@ const Rents: React.FC<any> = () => {
             action={Actions.PAYBACK_NFT}
             dataIndex={index}
             data={_data}
+            onFinish={()=>{refresh()}}
           />
         ))}
       </Content>

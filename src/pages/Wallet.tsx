@@ -28,6 +28,12 @@ const Wallet: React.FC<any> = () => {
     }
   }, [account])
 
+  const refresh = async ()=>{
+    const userEthNFTs = await Web3Api.account.getNFTs({chain:"rinkeby",address:account}) 
+    console.log("userEthNfts------->",userEthNFTs)
+    setNFts([...userEthNFTs.result])
+  }
+
   return (
     <Container>
       <Content>
@@ -41,6 +47,9 @@ const Wallet: React.FC<any> = () => {
           <DefaultCard
             key={index}
             // action={id === "Lend" ? Actions.LEND_NFT : Actions.PAYBACK_NFT}
+            onFinish={()=>{
+              refresh()
+            }}
             action={Actions.LEND_NFT}
             dataIndex={index}
             data={_data}

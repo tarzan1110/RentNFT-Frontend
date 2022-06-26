@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import { useState } from 'react';
 import { useMoralis } from 'react-moralis';
 import { useDispatch } from 'react-redux';
+import {NotificationContainer, NotificationManager} from 'react-notifications';
 
 import { Icon15x15 } from './Icon';
 import Modal from './Modals';
@@ -12,7 +13,7 @@ import { Actions } from 'store/types';
 import defaultNftImg from '../assets/empty_image.jpg'
 
 export const MarketCard: React.FC<any> = (props: any) => {
-  const { action, data, dataIndex, onClick } = props;
+  const { action, data, dataIndex, onClick, onFinish } = props;
   const {image_url,daily_price,collateral} = data
   let [showModal, setShowModal] = useState(false);
   let [confirm, setConfirm] = useState(false);
@@ -85,7 +86,10 @@ export const MarketCard: React.FC<any> = (props: any) => {
         showModal={showModal}
         content={
           <NFTDetail
-            setShowModal={setShowModal}
+              setShowModal={(val)=>{
+                setShowModal(val); 
+                if(onFinish){onFinish()}
+            }}
             data={data}
             setConfirm={setConfirm}
             action={action}
@@ -101,6 +105,7 @@ export const MarketCard: React.FC<any> = (props: any) => {
           />
         }
       />
+      <NotificationContainer/>
     </Container >
   );
 }

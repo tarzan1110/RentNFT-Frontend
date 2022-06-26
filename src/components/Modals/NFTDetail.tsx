@@ -108,9 +108,11 @@ const NFTDetail: React.FC<any> = (props) => {
         console.log("Payment is approved!")
         const message = await Moralis.executeFunction(options);
         await updateLendRecordForRent()
+        NotificationManager.success("RENT Success!")
       }
     } catch (error) {
-      console.log("error on rentNFT--->,error",error)
+      console.log("error on rentNFT--->,error",error.message)
+      NotificationManager.error("RENT Failure")
       return error
     }
   }
@@ -135,9 +137,11 @@ const NFTDetail: React.FC<any> = (props) => {
         console.log("NFT payback is approved!")
         const message = await Moralis.executeFunction(options);
         await updateLendRecordForPayback()
+        NotificationManager.success("Payback Success!")
       }
     } catch (error) {
       console.log("error on rentNFT--->,error",error)
+      NotificationManager.success("Payback failure!")
       return error
     }
   }
@@ -480,7 +484,7 @@ const NFTDetail: React.FC<any> = (props) => {
             text="OK"
             disabled={data.state === "Rented"}
             onClick={async () => {
-              onConfirm()
+              await onConfirm()
               setShowModal(false);
             }}
           />

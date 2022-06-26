@@ -27,7 +27,19 @@ const Market: React.FC<any> = () => {
     { autoFetch: false }
   );
 
-  
+  const refresh = async ()=>{
+
+    setTimeout(async () => {
+      const results = await fetch();
+      if(results){
+        const data = results.map((result)=>result.attributes)
+        setLends([...data])
+      }  
+    }, 2000);
+    
+    
+  }
+
 
   useEffect(() => {
     const getLendRecords = async () => {
@@ -62,6 +74,7 @@ const Market: React.FC<any> = () => {
             key={index}
             action={Actions.BUY_NFT}
             data={_data}
+            onFinish={()=>{refresh()}}
           />
         ))}
       </Content>

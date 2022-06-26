@@ -13,7 +13,7 @@ import { Actions } from 'store/types';
 import defaultNftImg from '../assets/empty_image.jpg'
 
 export const DefaultCard: React.FC<any> = (props: any) => {
-  const { action, data, dataIndex, onClick } = props;
+  const { action, data, dataIndex, onClick, onFinish } = props;
   let [showModal, setShowModal] = useState(false);
   let [confirm, setConfirm] = useState(false);
   const [metaData, setMetaData] = useState(null)
@@ -243,7 +243,11 @@ export const DefaultCard: React.FC<any> = (props: any) => {
         showModal={showModal}
         content={
           <NFTDetail
-            setShowModal={setShowModal}
+            setShowModal={(val)=>{
+                setShowModal(val); 
+                console.log('onfinish fired')
+                if(onFinish){onFinish()}
+            }}
             data={data}
             setConfirm={setConfirm}
             action={action}
