@@ -63,6 +63,13 @@ const NFTDetail: React.FC<any> = (props) => {
     const lendRecords =await fetchLendRecord()
     const selectedLendRecord = lendRecords[0]
     selectedLendRecord.destroy()
+
+
+    const results = await fetch();
+    const targetSyncRecord = results[0]
+    targetSyncRecord.destroy()
+    // const lendingId = results[0].attributes.lendingId
+
     // selectedLendRecord.set("status","rent")
     // selectedLendRecord.set("rent_date",(new Date()))
     // selectedLendRecord.save()
