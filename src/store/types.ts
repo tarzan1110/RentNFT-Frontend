@@ -24,4 +24,5 @@ export const Actions = {
   BUY_NFT: "BUY_NFT",         // Clicking on Buy Now button on Market/Collections Page
   PAYBACK_NFT: "PAYBACK_NFT", // Clicking on PayBack Now button on PayBack Page
   CLAIM_NFT: "CLAIM_NFT", // Clicking on PayBack Now button on PayBack Page
+  STOP_LENDING: "STOP_LENDING", // Clicking on PayBack Now button on PayBack Page
 };

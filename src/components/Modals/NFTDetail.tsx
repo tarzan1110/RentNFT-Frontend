@@ -56,14 +56,26 @@ const NFTDetail: React.FC<any> = (props) => {
     } catch(error){
       console.log("update rent record failure.")
     }
-    
  } 
+
+ const updateLendRecordForStop = async () => {
+  try{
+    const lendRecords =await fetchLendRecord()
+    const selectedLendRecord = lendRecords[0]
+    selectedLendRecord.destroy()
+    // selectedLendRecord.set("status","rent")
+    // selectedLendRecord.set("rent_date",(new Date()))
+    // selectedLendRecord.save()
+  } catch(error){
+    console.log("remove record failure.")
+  }
+} 
 
  const updateLendRecordForPayback= async () => {
   try{
     const lendRecords =await fetchLendRecord()
     const selectedLendRecord = lendRecords[0]
-    selectedLendRecord.set("status","")
+    selectedLendRecord.set("status","lend")
     selectedLendRecord.set("payback_date",(new Date()))
     selectedLendRecord.save()
     
@@ -112,7 +124,7 @@ const NFTDetail: React.FC<any> = (props) => {
       }
     } catch (error) {
       console.log("error on rentNFT--->,error",error.message)
-      NotificationManager.error("RENT Failure")
+      // NotificationManager.error("RENT Failure")
       return error
     }
   }
@@ -140,8 +152,37 @@ const NFTDetail: React.FC<any> = (props) => {
         NotificationManager.success("Payback Success!")
       }
     } catch (error) {
-      console.log("error on rentNFT--->,error",error)
-      NotificationManager.success("Payback failure!")
+      // console.log("error on rentNFT--->,error",error)
+      // NotificationManager.success("Payback failure!")
+      return error
+    }
+  }
+
+  const stopLendingNft=async ()=>{
+    try {      
+      const results = await fetch();
+      const lendingId = results[0].attributes.lendingId
+      if(lendingId){
+        const finalParams = {
+          _nfts: [data.token_address],
+          _tokenIds:  [data.token_id],
+          _lendingIds: [lendingId],
+        }
+        let options = {
+          contractAddress: "0x103c497e799C099F915EF39CDf0A3E99E5b47216",
+          functionName: "stopLending",
+          abi: ABI,
+          params: finalParams
+         };
+        // await approveNFT()
+        console.log("NFT stopLending is approved!")
+        const message = await Moralis.executeFunction(options);
+        await updateLendRecordForStop()
+        NotificationManager.success("Stop Lending Success!")
+      }
+    } catch (error) {
+      // console.log("error on rentNFT--->,error",error)
+      // NotificationManager.success("Payback failure!")
       return error
     }
   }
@@ -162,9 +203,8 @@ const NFTDetail: React.FC<any> = (props) => {
           abi: ABI,
           params: finalParams
          };
-        // await approveNFT()
-        // console.log("NFT payback is approved!")
         const message = await Moralis.executeFunction(options);
+        NotificationManager.success("Claim Success!")
         // await updateLendRecordForPayback()
       }
     } catch (error) {
@@ -189,12 +229,15 @@ const NFTDetail: React.FC<any> = (props) => {
     if (action === Actions.CLAIM_NFT){
       await claimNFT()
     }
+    if (action === Actions.STOP_LENDING){
+      await stopLendingNft()
+    }
   }
   const saveToDb = async ()=>{
     console.log("saveToDb is started.......")
     const LendRecord = Moralis.Object.extend("lend_records");
     const lendRecord = new LendRecord();
-
+    console.log('data---on save toDB--->', data)
     lendRecord
       .save({
         lender:account,
@@ -221,15 +264,9 @@ const NFTDetail: React.FC<any> = (props) => {
 
   const lendNft =async ()=>{
     await approveNFT()
-
-    console.log("NFT is approved!!!")
-    console.log("lendMaxDays--->",lendMaxDays)
-    console.log("lendDailyPrice--->",lendDailyPrice)
-    console.log("collateral--->",collateral)
-    console.log("paymentToken--->",paymentToken)
-    console.log("packprice- lendDaily --->", packPrice(lendDailyPrice))
     const resultPrice = packPrice(lendDailyPrice)
-    console.log("unpackprice- lendDaily --->", unpackPrice(resultPrice))
+    
+    console.log("data from nft---->",data)
     if(lendDailyPrice>0 && lendMaxDays>0 && collateral>0){
       console.log("contract success....")
       try {
@@ -252,6 +289,7 @@ const NFTDetail: React.FC<any> = (props) => {
          console.log("options.params----->",options.params)
          const message = await Moralis.executeFunction(options);
          saveToDb()
+         NotificationManager.success("Listing Success!")
       } catch (error) {
         console.log("error on fire--->,error",error)
         return error
@@ -349,6 +387,9 @@ const NFTDetail: React.FC<any> = (props) => {
     if (action=== Actions.CLAIM_NFT){
       return "CLAIM NFT"
     }
+    if (action=== Actions.STOP_LENDING){
+      return "STOP NFT LENDING"
+    }
     
   }
   return (
@@ -387,13 +428,13 @@ const NFTDetail: React.FC<any> = (props) => {
               {data.author}
             </TextClick>
             <TextBlack>{data.title}</TextBlack>
-            <A
+            {/* <A
               href={data.contractAdd ? "https://etherscan.io/address/" + data.contractAdd : ""}
               target="_blank"
             >
               {data.contractAdd ? data.contractAdd.slice(0, 5) + "..." + data.contractAdd.slice(data.contractAdd.length - 3) : ""}
-            </A>
-            <Text>{data.describe}</Text>
+            </A> */}
+            <Text>{"--data.name"}</Text>
           </Block>
           {action === Actions.BUY_NFT && <Block>
             <Input
@@ -463,6 +504,24 @@ const NFTDetail: React.FC<any> = (props) => {
               <Text>Rent Date</Text>
               <Text>{moment(data.rent_date).format("YYYY-MM-DD")}</Text>
             </Line>
+            <Line>
+              <Text>Max Duration</Text>
+              <Text>{data.max_days} Days</Text>
+            </Line>
+            <Line>
+              <Text>Daily Price</Text>
+              <Text>{data.daily_price} {data.priceUnit}</Text>
+            </Line>
+            <Line>
+              <Text>Collateral Price</Text>
+              <Text>{data.collateral} {data.priceUnit}</Text>
+            </Line>
+            {/* <Line>
+              <Text>Total Amount</Text>
+              <Text>{Number(data.max_days) * Number(data.daily_price)} {data.priceUnit}</Text>
+            </Line> */}
+          </Block>}
+          {action === Actions.STOP_LENDING && <Block>
             <Line>
               <Text>Max Duration</Text>
               <Text>{data.max_days} Days</Text>

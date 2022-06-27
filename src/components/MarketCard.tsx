@@ -105,7 +105,6 @@ export const MarketCard: React.FC<any> = (props: any) => {
           />
         }
       />
-      <NotificationContainer/>
     </Container >
   );
 }

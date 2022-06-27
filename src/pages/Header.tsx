@@ -127,6 +127,12 @@ const Header: React.FC = () => {
             Pay Back
           </Menu>
           <Menu
+            onClick={() => onClick("/StopLending")}
+            isActive={tab === "/StopLending"}
+          >
+           Stop Lending
+          </Menu>
+          <Menu
             onClick={() => onClick("/Claim")}
             isActive={tab === "/Claim"}
           >
@@ -168,6 +174,12 @@ const Header: React.FC = () => {
           isActive={tab === "/Wallet/PayBack"}
         >
           Pay Back
+        </MobileMenu>
+        <MobileMenu
+          onClick={() => onClick("/StopLending")}
+          isActive={tab === "/StopLending"}
+        >
+          Stop Lendings
         </MobileMenu>
         <MobileMenu
           onClick={() => {

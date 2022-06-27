@@ -77,10 +77,18 @@ export const DefaultCard: React.FC<any> = (props: any) => {
           <Img
             style={{height:'100%',backgroundColor:"green"}}
             src={data.image_url===""?defaultNftImg:  data.image_url}
-            // src = {data.image}
             onClick={() => {
               if (action !== "collections") setShowModal(true);
               // else onClick();
+            }}
+          />
+        }
+         { action === Actions.STOP_LENDING && 
+          <Img
+            style={{height:'100%',backgroundColor:"green"}}
+            src={data.image_url===""?defaultNftImg:  data.image_url}
+            onClick={() => {
+               setShowModal(true);
             }}
           />
         }
@@ -157,6 +165,29 @@ export const DefaultCard: React.FC<any> = (props: any) => {
           }
           {
             action === Actions.PAYBACK_NFT && 
+              <Detail>
+                <Line>{data.author}</Line>
+                <Line>
+                  Daily Price
+                  <div>
+                    {data.daily_price}
+                    {data.priceUnit}
+                  </div>
+                </Line>
+                <Line>
+                  Collateral
+                  <div>
+                    {data.collateral}
+                    {data.priceUnit}
+                  </div>
+                </Line>
+                <Line>
+                  {data.state}
+                </Line>
+              </Detail>
+          }
+            {
+            action === Actions.STOP_LENDING && 
               <Detail>
                 <Line>{data.author}</Line>
                 <Line>
@@ -263,7 +294,6 @@ export const DefaultCard: React.FC<any> = (props: any) => {
           />
         }
       />
-      <NotificationContainer/>
     </Container >
   );
 }
