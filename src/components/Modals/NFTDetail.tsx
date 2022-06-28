@@ -17,7 +17,7 @@ import USDT_CONFIG from 'config/USDT.json'
 type CAHIN_TYPE = "eth" | "0x1" | "ropsten" | "0x3" | "rinkeby" | "0x4" | "goerli" | "0x5" | "kovan" | "0x2a" | "polygon" | "0x89" | "mumbai" | "0x13881" | "bsc" | "0x38" | "bsc testnet" | "0x61" | "avalanche" | "0xa86a" | "avalanche testnet" | "0xa869" | "fantom" | "0xfa" | undefined
 
 const NFTDetail: React.FC<any> = (props) => {
-  const { setShowModal, data, setConfirm, action } = props;
+  const { setShowModal, data, setConfirm, action,metaData } = props;
   const navigate = useNavigate();
   const { Moralis, account } = useMoralis();
   const Web3Api = useMoralisWeb3Api();  
@@ -253,7 +253,7 @@ const NFTDetail: React.FC<any> = (props) => {
         daily_price: lendDailyPrice,
         max_days: lendMaxDays,
         collateral: collateral,
-        image_url: "",
+        image_url: metaData?.extractedUrl,
         paymentToken:paymentToken,
         status:"lend"
       })
@@ -399,6 +399,7 @@ const NFTDetail: React.FC<any> = (props) => {
     }
     
   }
+
   return (
     <Container>
       <Title>
@@ -411,7 +412,7 @@ const NFTDetail: React.FC<any> = (props) => {
       </Title>
       <Content>
         <Section>
-          <Img src={data.imagePath || defaultNftImg} />             
+          <Img src={data.image_url || defaultNftImg} />             
         </Section>
         <Section>
           <Block>

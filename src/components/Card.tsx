@@ -26,8 +26,18 @@ export const DefaultCard: React.FC<any> = (props: any) => {
   useEffect(()=>{
     if(data.metadata){
       const metaObj = JSON.parse(data.metadata)
+      const tempArray = metaObj.image.split("//")
+      let extractedUrl = ""
+      if(tempArray.length>1){
+        extractedUrl = tempArray[1]
+        
+        if(extractedUrl.indexOf("ipfs/")>-1){
+          extractedUrl = extractedUrl.replace("ipfs/","")
+          // console.log("extractedURl----xxx--------->", extractedUrl)
+        }
+      }
+      metaObj.extractedUrl = "https://ipfs.moralis.io:2053/ipfs/" + extractedUrl 
       setMetaData(metaObj)
-      console.log("metaObj-0--->", metaObj)
     }
   },[data.metadata])
   console.log('data on default card------->',data)
@@ -68,7 +78,7 @@ export const DefaultCard: React.FC<any> = (props: any) => {
     }
     setConfirm(false);
   }
-  console.log('metaData?.image------->',metaData?.image)
+  console.log('metaData?.image------->',metaData)
  
   return (
     <Container>
@@ -95,8 +105,8 @@ export const DefaultCard: React.FC<any> = (props: any) => {
          { action === Actions.LEND_NFT && 
           <Img
             style={{height:'100%',backgroundColor:"green"}}
-            // src={metaData?.image}
-            src = {defaultNftImg}
+            src={metaData?.extractedUrl}
+            // src = {defaultNftImg}
             onClick={() => {
               if (action !== "collections") setShowModal(true);
               // else onClick();
@@ -279,6 +289,7 @@ export const DefaultCard: React.FC<any> = (props: any) => {
                 console.log('onfinish fired')
                 if(onFinish){onFinish()}
             }}
+            metaData = {metaData}
             data={data}
             setConfirm={setConfirm}
             action={action}
