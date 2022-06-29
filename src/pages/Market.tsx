@@ -12,7 +12,7 @@ const Market: React.FC<any> = () => {
   const data = useSelector((state: any) => state.marketNFTs);
   const tokenAddressParam = useParams().id || "";
   
-  console.log("tokenAddressParam--xxxxxxxxxx-->", tokenAddressParam)
+  // console.log("tokenAddressParam--xxxxxxxxxx-->", tokenAddressParam)
   const [searchData, setSearchData] = useState(data);
   const [filterData, setFilterData] = useState(searchData);
   const [lends, setLends] = useState([])
@@ -21,11 +21,18 @@ const Market: React.FC<any> = () => {
   
   const { fetch } = useMoralisQuery(
     "lend_records",
-    (query) =>
-      query.equalTo("status","lend").limit(10).equalTo("token_address",tokenAddressParam),
+    (query) =>{
+      if(tokenAddressParam.length>0){
+        return query.equalTo("status","lend").limit(10).equalTo("token_address",tokenAddressParam)
+      }else{
+        return query.equalTo("status","lend").limit(10)
+      }
+    },
     [],
     { autoFetch: false }
   );
+
+
 
   const refresh = async ()=>{
 

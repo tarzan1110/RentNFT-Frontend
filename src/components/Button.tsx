@@ -15,7 +15,8 @@ export const ButtonStyle = styled.button`
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  width: 120px;
+  // width: 120px;
+  padding:5px 15px;
   height: 36px;
   border: 1px solid var(--shade-4);
   box-sizing: border-box;

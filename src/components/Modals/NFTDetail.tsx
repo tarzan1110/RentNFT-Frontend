@@ -412,7 +412,11 @@ const NFTDetail: React.FC<any> = (props) => {
       </Title>
       <Content>
         <Section>
-          <Img src={data.image_url || defaultNftImg} />             
+          {
+            action === Actions.LEND_NFT ?
+            <Img src={metaData.extractedUrl || defaultNftImg} />:
+            <Img src={data.image_url || defaultNftImg} />             
+          }
         </Section>
         <Section>
           <Block>
@@ -451,7 +455,7 @@ const NFTDetail: React.FC<any> = (props) => {
               onChange={(e)=>{setRentDuration(e.target.value)}}
             />
             <Line>
-              <Text>Max Duration xx</Text>
+              <Text>Max Duration </Text>
               <Text>{data.max_days} Days</Text>
             </Line>
             <Line>
@@ -541,13 +545,9 @@ const NFTDetail: React.FC<any> = (props) => {
               <Text>Collateral Price</Text>
               <Text>{data.collateral} {data.priceUnit}</Text>
             </Line>
-            {/* <Line>
-              <Text>Total Amount</Text>
-              <Text>{Number(data.max_days) * Number(data.daily_price)} {data.priceUnit}</Text>
-            </Line> */}
           </Block>}
           <Button
-            text="OK"
+            text= {getTitle()}
             disabled={data.state === "Rented"}
             onClick={async () => {
               await onConfirm()
