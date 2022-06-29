@@ -6,12 +6,12 @@ const GlobalStyles = createGlobalStyle`
   --border-radius: 18px;
 
   --hover: yellow;
-  --blue: #073A65;
+  --blue: #0014ca;
   --shade-0: #000;
   --shade-1: #303030;
   --shade-2: #606060;
   --shade-3: #808080;
-  --shade-4: #A0A0A0;
+  --shade-4: #000000;
   --shade-5: #BEBEBE;
   --shade-6: #D8D8D8;
   --shade-7: #F0F0F0;

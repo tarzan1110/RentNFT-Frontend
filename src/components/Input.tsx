@@ -48,7 +48,8 @@ const InputStyle = styled.input`
 export const Title = styled.div<{ $isError?: any }>`
 	font-weight: 400;
   font-size: 14px;
-  color: var(--shade-4);
+  color: black;
+  // color: var(--shade-4);
 `;
 
 const Unit = styled.div`

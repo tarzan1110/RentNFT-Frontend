@@ -442,7 +442,6 @@ const NFTDetail: React.FC<any> = (props) => {
             >
               {data.contractAdd ? data.contractAdd.slice(0, 5) + "..." + data.contractAdd.slice(data.contractAdd.length - 3) : ""}
             </A> */}
-            <Text>{"--data.name"}</Text>
           </Block>
           {action === Actions.BUY_NFT && <Block>
             <Input
@@ -452,7 +451,7 @@ const NFTDetail: React.FC<any> = (props) => {
               onChange={(e)=>{setRentDuration(e.target.value)}}
             />
             <Line>
-              <Text>Max Duration</Text>
+              <Text>Max Duration xx</Text>
               <Text>{data.max_days} Days</Text>
             </Line>
             <Line>
@@ -635,7 +634,8 @@ const Lender = styled.div`
 export const Text = styled.div`
   font-weight: 400;
   font-size: 14px;
-  color: var(--shade-4);
+  color: black;
+  // color: var(--shade-4);
 `;
 export const TextBlack = styled.div`
   color: var(--shade-0);

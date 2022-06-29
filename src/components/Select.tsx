@@ -46,6 +46,7 @@ export const Title = styled.div<{ $isError?: any }>`
 	font-weight: 400;
   font-size: 14px;
   color: var(--shade-4);
+  color: black;
 `;
 
 const Unit = styled.div`
