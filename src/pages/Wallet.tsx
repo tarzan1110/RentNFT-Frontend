@@ -46,6 +46,7 @@ const Wallet: React.FC<any> = () => {
         {isAuthenticated && nfts.map((_data: any, index: number) => (
           <DefaultCard
             key={index}
+            indexParam={index}
             // action={id === "Lend" ? Actions.LEND_NFT : Actions.PAYBACK_NFT}
             onFinish={()=>{
               refresh()

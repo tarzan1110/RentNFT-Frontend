@@ -13,7 +13,7 @@ import { Actions } from 'store/types';
 import defaultNftImg from '../assets/empty_image.jpg'
 
 export const DefaultCard: React.FC<any> = (props: any) => {
-  const { action, data, dataIndex, onClick, onFinish } = props;
+  const { action, data, dataIndex, onClick, onFinish ,key, indexParam} = props;
   let [showModal, setShowModal] = useState(false);
   let [confirm, setConfirm] = useState(false);
   const [metaData, setMetaData] = useState(null)
@@ -22,25 +22,31 @@ export const DefaultCard: React.FC<any> = (props: any) => {
   const text = action === Actions.BUY_NFT ?
     (isAuthenticated ? "Rented Sucessfully!" : "Please connect to your Wallet.") :
     (action === Actions.LEND_NFT ? "Lended Sucessfully!" : "Returned Sucessfully!")
-
+  
+  console.log("indexParam, data---<----------->", indexParam, data)
   useEffect(()=>{
     if(data.metadata){
-      const metaObj = JSON.parse(data.metadata)
-      const tempArray = metaObj.image.split("//")
       let extractedUrl = ""
-      if(tempArray.length>1){
-        extractedUrl = tempArray[1]
-        
-        if(extractedUrl.indexOf("ipfs/")>-1){
-          extractedUrl = extractedUrl.replace("ipfs/","")
-          // console.log("extractedURl----xxx--------->", extractedUrl)
+      const metaObj = JSON.parse(data.metadata)
+      const imageHasHttps = metaObj.image.indexOf("https://") > -1 
+      if(imageHasHttps){
+        metaObj.extractedUrl = metaObj.image
+      }else{
+        const tempArray = metaObj.image.split("//")
+        if(tempArray.length>1){
+          extractedUrl = tempArray[1]          
+          if(extractedUrl.indexOf("ipfs/")>-1){
+            extractedUrl = extractedUrl.replace("ipfs/","")
+            // console.log("extractedURl----xxx--------->", extractedUrl)
+          }
         }
+        metaObj.extractedUrl = "https://ipfs.moralis.io:2053/ipfs/" + extractedUrl 
       }
-      metaObj.extractedUrl = "https://ipfs.moralis.io:2053/ipfs/" + extractedUrl 
+      
       setMetaData(metaObj)
     }
   },[data.metadata])
-  console.log('data on default card------->',data)
+  // console.log('data on default card------->',data)
   // const clickOk = () => {
   //   switch (action) {
   //     case Actions.BUY_NFT: {
@@ -78,7 +84,7 @@ export const DefaultCard: React.FC<any> = (props: any) => {
     }
     setConfirm(false);
   }
-  console.log('metaData?.image------->',metaData)
+  // console.log('metaData?.image------->',metaData)
  
   return (
     <Container>
