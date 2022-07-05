@@ -255,6 +255,7 @@ const NFTDetail: React.FC<any> = (props) => {
         collateral: collateral,
         image_url: metaData?.extractedUrl,
         paymentToken:paymentToken,
+        mediaType: metaData?.mediaType,
         status:"lend"
       })
       .then(
@@ -414,8 +415,25 @@ const NFTDetail: React.FC<any> = (props) => {
         <Section>
           {
             action === Actions.LEND_NFT ?
-            <Img src={metaData.extractedUrl || defaultNftImg} />:
-            <Img src={data.image_url || defaultNftImg} />             
+            <div>
+              {
+                metaData.mediaType == 'video'?
+                <video controls>
+                  <source src={metaData.extractedUrl} type="video/mp4" />
+                </video>:
+                <Img src={metaData.extractedUrl || defaultNftImg} />  
+              }
+            </div>
+            :
+            <div>
+              {
+                metaData.mediaType == 'video'?
+                <video autoPlay muted loop>
+                  <source src={data.video_url} type="video/mp4" />
+                </video>:
+                <Img src={data.image_url || defaultNftImg} />             
+              }
+            </div>
           }
         </Section>
         <Section>

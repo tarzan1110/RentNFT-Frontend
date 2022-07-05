@@ -33,7 +33,7 @@ const Wallet: React.FC<any> = () => {
     console.log("userEthNfts------->",userEthNFTs)
     setNFts([...userEthNFTs.result])
   }
-
+  
   return (
     <Container>
       <Content>

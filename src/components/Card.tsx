@@ -23,48 +23,49 @@ export const DefaultCard: React.FC<any> = (props: any) => {
     (isAuthenticated ? "Rented Sucessfully!" : "Please connect to your Wallet.") :
     (action === Actions.LEND_NFT ? "Lended Sucessfully!" : "Returned Sucessfully!")
   
-  console.log("indexParam, data---<----------->", indexParam, data)
+  // console.log("indexParam, data---<----------->", indexParam, data)
   useEffect(()=>{
     if(data.metadata){
       let extractedUrl = ""
       const metaObj = JSON.parse(data.metadata)
-      const imageHasHttps = metaObj.image.indexOf("https://") > -1 
-      if(imageHasHttps){
-        metaObj.extractedUrl = metaObj.image
-      }else{
-        const tempArray = metaObj.image.split("//")
-        if(tempArray.length>1){
-          extractedUrl = tempArray[1]          
-          if(extractedUrl.indexOf("ipfs/")>-1){
-            extractedUrl = extractedUrl.replace("ipfs/","")
-            // console.log("extractedURl----xxx--------->", extractedUrl)
+      console.log("metaobject in card--->", metaObj)
+      if(metaObj.image){
+        const imageHasHttps = metaObj.image.indexOf("https://") > -1 
+        if(imageHasHttps){
+          metaObj.extractedUrl = metaObj.image
+        }else{
+          const tempArray = metaObj.image.split("//")
+          if(tempArray.length>1){
+            extractedUrl = tempArray[1]          
+            if(extractedUrl.indexOf("ipfs/")>-1){
+              extractedUrl = extractedUrl.replace("ipfs/","")
+              // console.log("extractedURl----xxx--------->", extractedUrl)
+            }
           }
+          metaObj.extractedUrl = "https://ipfs.moralis.io:2053/ipfs/" + extractedUrl 
+          metaObj.mediaType = "image"
         }
-        metaObj.extractedUrl = "https://ipfs.moralis.io:2053/ipfs/" + extractedUrl 
+      }else{
+        const imageHasHttps = metaObj.animation_url.indexOf("https://") > -1 
+        if(imageHasHttps){
+          metaObj.extractedUrl = metaObj.animation_url
+        }else{
+          const tempArray = metaObj.animation_url.split("//")
+          if(tempArray.length>1){
+            extractedUrl = tempArray[1]          
+            if(extractedUrl.indexOf("ipfs/")>-1){
+              extractedUrl = extractedUrl.replace("ipfs/","")
+              // console.log("extractedURl----xxx--------->", extractedUrl)
+            }
+          }
+          metaObj.extractedUrl = "https://ipfs.moralis.io:2053/ipfs/" + extractedUrl 
+          metaObj.mediaType = "video"
+        }
       }
-      
       setMetaData(metaObj)
     }
   },[data.metadata])
-  // console.log('data on default card------->',data)
-  // const clickOk = () => {
-  //   switch (action) {
-  //     case Actions.BUY_NFT: {
-  //       if (isAuthenticated)
-  //         dispatch({ type: Actions.BUY_NFT, title: data.title });
-  //       break;
-  //     }
-  //     case Actions.LEND_NFT: {
-  //       dispatch({ type: Actions.LEND_NFT, dataIndex: dataIndex });
-  //       break;
-  //     }
-  //     case Actions.PAYBACK_NFT: {
-  //       dispatch({ type: Actions.PAYBACK_NFT, dataIndex: dataIndex });
-  //       break;
-  //     }
-  //   }
-  //   setConfirm(false);
-  // }
+
 
   const clickOk = () => {
     switch (action) {
@@ -91,7 +92,7 @@ export const DefaultCard: React.FC<any> = (props: any) => {
       <CardBody>
         { action === Actions.PAYBACK_NFT && 
           <Img
-            style={{height:'100%',backgroundColor:"green"}}
+            style={{height:'100%'}}
             src={data.image_url===""?defaultNftImg:  data.image_url}
             onClick={() => {
               if (action !== "collections") setShowModal(true);
@@ -101,7 +102,7 @@ export const DefaultCard: React.FC<any> = (props: any) => {
         }
          { action === Actions.STOP_LENDING && 
           <Img
-            style={{height:'100%',backgroundColor:"green"}}
+            style={{height:'100%'}}
             src={data.image_url===""?defaultNftImg:  data.image_url}
             onClick={() => {
                setShowModal(true);
@@ -109,15 +110,16 @@ export const DefaultCard: React.FC<any> = (props: any) => {
           />
         }
          { action === Actions.LEND_NFT && 
+          <div style={{height:'100%'}} onClick={()=>{setShowModal(true)}}>{
+          metaData?.mediaType === "video"?
+          <video autoPlay muted loop>
+            <source src={metaData.extractedUrl} type="video/mp4" />
+          </video>:
           <Img
-            style={{height:'100%',backgroundColor:"green"}}
+            style={{height:'100%'}}
             src={metaData?.extractedUrl}
-            // src = {defaultNftImg}
-            onClick={() => {
-              if (action !== "collections") setShowModal(true);
-              // else onClick();
-            }}
-          />
+          />}
+          </div>
         }
          { action === Actions.CLAIM_NFT && 
           <Img
@@ -335,6 +337,12 @@ const CardBody = styled.div`
   flex-direction: column;
   box-shadow: 0 8px 36px #e4e4e4;
   border-radius: var(--border-radius);  
+  height:100%;
+  video {
+    height: 100%;
+    object-fit: cover;
+    width:100%;
+ }
 `
 const Img = styled.img`
   width: 100%;
